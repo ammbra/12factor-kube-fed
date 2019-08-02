@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dreamhome-web
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: dreamhome-web
+  revisionHistoryLimit: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: dreamhome-web
+        tier: frontend
+        implementation: nodejs
+    spec:
+      imagePullSecrets:
+        - name: regsecret
+      containers:
+        - name: dreamhome-web
+          image: <REPLACE_WITH_YOUR_OWN_IMAGE_REGISTRY_LOCATION>
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 3000
+          env:
+            - name: BROKER_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: front-end-broker-config
+                  key: backend.port
+            - name: PROPERTY_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: front-end-property-config
+                  key: backend.port
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dreamhome-web
+  labels:
+    app: dreamhome-web
+spec:
+  type: NodePort
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: http
+      nodePort: 31255
+  selector:
+    app: dreamhome-web
+    tier: frontend

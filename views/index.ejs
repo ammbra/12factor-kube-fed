@@ -1,0 +1,39 @@
+<% include partials/header.ejs %>
+    <div class="table-wrapper">
+        <% if (properties.length > 0) {%>
+            <table class="table table-hovered">
+                <thead class="thead-dark">
+                    <tr>
+                        <th scope="col">Address</th>
+                        <th scope="col">Zip</th>
+                        <th scope="col">Baths</th>
+                        <th scope="col">Bedrooms</th>
+                        <th scope="col">Offered for</th>
+                        <th scope="col">Broker Name</th>
+                        <th scope="col">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% properties.forEach((property, index) => { %>
+                        <tr>
+                            <th scope="row"><%= property.address%></th>
+                            <td><%= property.zip %></td>
+                            <td><%= property.baths %></td>
+                            <td><%= property.bedrooms %></td>
+                            <td><%= property.transactionType %></td>
+                            <td><%= property.brokerName %></td>                            
+                            <td>
+                                <a href="/edit/<%= property._id %>" target="_blank" rel="noopener" class="btn btn-sm btn-success">Edit</a>
+                                <a href="/delete/<%= property._id %>/<%= property._rev %>" class="btn btn-sm btn-danger">Delete</a>
+                            </td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        <% } else { %>
+            <p class="text-center">No properties found. Go <a href="/add" >here</a> to add properties.</p>
+        <% } %>
+    </div>
+</div>
+</body>
+</html>
