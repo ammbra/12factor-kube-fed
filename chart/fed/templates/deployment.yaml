@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: {{ include "fed.fullname" . }}
+    labels:
+        app.kubernetes.io/name: {{ include "fed.name" . }}
+        helm.sh/chart: {{ include "fed.chart" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+    replicas: {{ .Values.replicaCount }}
+    selector:
+        matchLabels:
+            app.kubernetes.io/name: {{ include "fed.name" . }}
+            app.kubernetes.io/instance: {{ .Release.Name }}
+    template:
+        metadata:
+            labels:
+                app.kubernetes.io/name: {{ include "fed.name" . }}
+                app.kubernetes.io/instance: {{ .Release.Name }}
+        spec:
+            containers:
+                - name: {{ .Chart.Name }}
+                  image: "{{ .Values.deployment.containers.image }}:{{ .Values.deployment.containers.imageTag }}"
+                  imagePullPolicy: {{ .Values.deployment.containers.imagePullPolicy }}
+                  ports:
+                      - name: http
+                        containerPort: {{ .Values.deployment.containers.ports.containerPort }}
+                  env:
+                      - name: {{ .Values.deployment.containers.env.broker }}
+                        valueFrom:
+                            configMapKeyRef:
+                                name: {{ .Values.deployment.containers.env.configMapBroker }}
+                                key: {{ .Values.deployment.containers.env.key }}
+                      - name: {{ .Values.deployment.containers.env.property}}
+                        valueFrom:
+                            configMapKeyRef:
+                                name: {{ .Values.deployment.containers.env.configMapProperty }}
+                                key: {{ .Values.deployment.containers.env.key }}
+                  resources:
+                {{- toYaml .Values.resources | nindent 12 }}
+                {{- with .Values.nodeSelector }}
+            nodeSelector:
+                {{- toYaml . | nindent 8 }}
+                {{- end }}
+                {{- with .Values.affinity }}
+            affinity:
+                {{- toYaml . | nindent 8 }}
+                {{- end }}
+                {{- with .Values.tolerations }}
+            tolerations:
+            {{- toYaml . | nindent 8 }}
+        {{- end }}
